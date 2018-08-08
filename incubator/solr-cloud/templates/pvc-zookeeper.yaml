@@ -1,0 +1,13 @@
+{{ if .Values.zookeeper.create_pvc }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ .Values.zookeeper.pvc_name }}
+spec:
+  storageClassName: {{ .Values.storage_class_name }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+{{ end }}

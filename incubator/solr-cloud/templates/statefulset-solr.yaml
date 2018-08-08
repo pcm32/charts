@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "solr-cloud.fullname" . }}"-svc"
+  labels:
+    app: {{ template "solr-cloud.name" . }}
+spec:
+  ports:
+  - port: 8983
+    name: solr-port
+  clusterIP: None
+  selector:
+    app: {{ template "solr-cloud.name" . }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ template "solr-cloud.fullname" . }}
+  labels:
+    app: {{ template "solr-cloud.name" . }}
+    chart: {{ template "solr-cloud.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+# metadata:
+#  name: solr-deployment
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "solr-cloud.name" . }}
+  serviceName: {{ template "solr-cloud.fullname" . }}"-svc"
+  replicas: {{ .Values.replicaCount }}
+  volumeClaimTemplates: 
+  - metadata:
+      name: vol
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.storage_class_name }}
+      resources:
+        requests:
+          storage: "{{ .Values.storage_size_request_node_gb }}Gi"
+  template: 
+    metadata:
+      labels:
+        app: {{ template "solr-cloud.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: Never
+      containers: 
+      - name: solr
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        # image: solr:latest
+        volumeMounts:
+        - name: vol
+          mountPath: /store
+        ports:
+        - name: solr-port
+          containerPort: 8983
+        env:
+          - name: SOLR_HOME
+            valueFrom: 
+              configMapKeyRef:
+                # name: solr-config
+                name: {{ template "solr-cloud.name" . }}
+                key: solrHome
+          - name: SOLR_PORT
+            valueFrom: 
+              configMapKeyRef:
+                name: {{ template "solr-cloud.name" . }}
+                key: solrPort
+          - name: ZK_HOST
+            valueFrom: 
+              configMapKeyRef:
+                name: {{ template "solr-cloud.name" . }}
+                key: zkHost
+          - name: SOLR_HOST
+            valueFrom: 
+              configMapKeyRef:
+                name: {{ template "solr-cloud.name" . }}
+                key: solrHost
+          - name: SOLR_LOGS_DIR
+            valueFrom: 
+              configMapKeyRef:
+                name: {{ template "solr-cloud.name" . }}
+                key: solrLogsDir
+

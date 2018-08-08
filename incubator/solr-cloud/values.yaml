@@ -1,0 +1,44 @@
+# Default values for solr-cloud.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 3
+
+image:
+  repository: solr
+  tag: latest
+  pullPolicy: IfNotPresent
+
+solr_port: 32080
+storage_size_request_node_gb: 10
+storage_class_name: openstack-cinder
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+  #
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+zookeeper:
+  create_pvc: true
+  pvc_name: "zookeeper-pvc"
+  node_port: 32181
+  image:
+    repository: zookeeper
+    tag: latest
+    pullPolicy: IfNotPresent
+

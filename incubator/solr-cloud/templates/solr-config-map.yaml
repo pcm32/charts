@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "solr-cloud.name" . }} 
+  annotations:
+     "helm.sh/hook": pre-install
+data:
+  solrPort: {{ quote .Values.solr_port }}
+  zkHost: {{ template "solr-cloud.name" . }}"-zookeeper"
+  solrHost: {{ template "solr-cloud.fullname" . }}"-svc"
+  solrLogsDir: "/store/logs"
+
